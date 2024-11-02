@@ -1,3 +1,7 @@
+---
+import Form from "../components/Form"
+import TodoApp from "../components/TodoApp"
+---
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,7 +9,10 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Document</title>
 </head>
-<body>
-	<h1 class="bg-green-500">Hola mundo</h1>
+<body class="bg-[#0f0f0f]">
+	<div class="flex justify-center">
+		<TodoApp client:load/>
+	</div>
+	
 </body>
 </html>
