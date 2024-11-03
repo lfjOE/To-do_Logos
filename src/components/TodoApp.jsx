@@ -4,13 +4,23 @@ import { AnimatePresence, motion } from "framer-motion";
 import Form from "./Form";
 import TaskCard from "./TaskCard";
 import "./TodoApp.css";  // Archivo CSS opcional para estilos adicionales
+import { createTask } from "../../APIs/POSTphrase";
 
 export default function TodoApp() {
   const [tasks, setTasks] = useState([]);
-
-  const addTask = (newTask) => {
-    const taskWithId = { id: Date.now(), text: newTask, phrase: "Lorem Ipsum Dolor" };
-    setTasks((prevTasks) => [...prevTasks, taskWithId]);
+  
+  const addTask = async (newTask) => {
+    try {
+      const response = await createTask(newTask); // Llama a createTask
+      const taskWithId = {
+        id: response.id,
+        text: newTask,
+        phrase: response.frase // Asegúrate de que `phrase` sea un string y no un objeto
+      };
+      setTasks((prevTasks) => [...prevTasks, taskWithId]);
+    } catch (error) {
+      console.error("No se pudo agregar la tarea:", error);
+    }
   };
 
   const removeTask = (idToRemove) => {
