@@ -1,4 +1,4 @@
-const API_URL = "http://44.233.151.27/to-do"; // Asegúrate de incluir 'http://' o 'https://'
+const API_URL = "https://44.233.151.27/to-do"; // Asegúrate de incluir 'http://' o 'https://'
 
 export const createTask = (taskText) => {
   return new Promise((resolve, reject) => {
