@@ -38,6 +38,7 @@ export default function TodoApp() {
   };
 
   const removeTask = (idToRemove) => {
+    // Actualización correcta del estado: Filtramos solo el elemento con el id que debe eliminarse
     const newTasks = tasks.filter((task) => task.id !== idToRemove);
     setTasks(newTasks);
     // Guardar tareas actualizadas en localStorage
@@ -52,7 +53,7 @@ export default function TodoApp() {
       <div className="mt-4">
         <AnimatePresence>
           <div className="grid grid-cols-1 gap-0.5">
-            {tasks.map((task, index) => (
+            {tasks.map((task) => (
               <motion.div
                 key={task.id}  // Usamos id único como key
                 initial={{ opacity: 0, y: -20 }}
