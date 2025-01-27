@@ -13,7 +13,7 @@ export default function TodoApp() {
     try {
       const response = await createTask(newTask); // Llama a createTask
       const taskWithId = {
-        id: response.id,
+        id: response.quote,
         text: newTask,
         phrase: response.frase // Asegúrate de que `phrase` sea un string y no un objeto
       };
