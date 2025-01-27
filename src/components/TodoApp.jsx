@@ -19,13 +19,12 @@ export default function TodoApp() {
   const addTask = async (newTask) => {
     try {
       const response = await createTask(newTask); // Llama a createTask
-      const taskWithId = {
-        id: response.id,
+      const taskWithPhrase = {
         text: newTask,
         phrase: response.quote + " - " + response.author // Asegúrate de que `phrase` sea un string y no un objeto
       };
       setTasks((prevTasks) => {
-        const updatedTasks = [...prevTasks, taskWithId];
+        const updatedTasks = [...prevTasks, taskWithPhrase];
         // Guardar tareas en localStorage
         if (typeof window !== "undefined") {
           localStorage.setItem("tasks", JSON.stringify(updatedTasks));
@@ -37,8 +36,8 @@ export default function TodoApp() {
     }
   };
 
-  const removeTask = (idToRemove) => {
-    const newTasks = tasks.filter((task) => task.id !== idToRemove);
+  const removeTask = (indexToRemove) => {
+    const newTasks = tasks.filter((task, index) => index !== indexToRemove);
     setTasks(newTasks);
     // Guardar tareas actualizadas en localStorage
     if (typeof window !== "undefined") {
@@ -52,9 +51,9 @@ export default function TodoApp() {
       <div className="mt-4">
         <AnimatePresence>
           <div className="grid grid-cols-1 gap-0.5">
-            {tasks.map((task) => (
+            {tasks.map((task, index) => (
               <motion.div
-                key={task.id}
+                key={index}  // Cambiado para usar el índice como key
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
@@ -64,7 +63,7 @@ export default function TodoApp() {
                 <TaskCard 
                   task={task.text}
                   phrase={task.phrase}
-                  removeTask={() => removeTask(task.id)} 
+                  removeTask={() => removeTask(index)}  // Usamos el índice en vez de un id
                 />
               </motion.div>
             ))}
