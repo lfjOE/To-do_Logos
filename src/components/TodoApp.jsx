@@ -1,40 +1,35 @@
 import { useState, useEffect } from "react";
-import { createTask, getTasksFromApi } from "../../APIs/POSTphrase";  // Asumimos que getTasksFromApi obtiene las tareas de la API
+import { AnimatePresence, motion } from "framer-motion";
+import Form from "./Form";
+import TaskCard from "./TaskCard";
+import "./TodoApp.css";
+import { createTask, getTasksFromApi } from "../../APIs/POSTphrase";  // Asegúrate de que esta función existe
 
 export default function TodoApp() {
   const [tasks, setTasks] = useState([]);
 
-  // Cargar las tareas del localStorage o de la API
   useEffect(() => {
+    // Obtener las tareas desde la API al cargar el componente
     const loadTasks = async () => {
-      if (typeof window !== "undefined") {
-        // Primero intentamos obtener tareas desde localStorage
-        const storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
-        if (storedTasks.length > 0) {
-          setTasks(storedTasks);
-        } else {
-          // Si no hay tareas en localStorage, obtenemos desde la API
-          const tasksFromApi = await getTasksFromApi();
-          setTasks(tasksFromApi);
-          localStorage.setItem("tasks", JSON.stringify(tasksFromApi));  // Guardar las tareas en localStorage
-        }
+      try {
+        const response = await getTasksFromApi();  // Obtén las tareas desde la API
+        setTasks(response);  // Asigna las tareas a tu estado
+      } catch (error) {
+        console.error("Error al cargar las tareas:", error);
       }
     };
 
     loadTasks();
-  }, []);
+  }, []);  // El array vacío asegura que esto solo se ejecute una vez cuando el componente se monte
 
-  // Agregar tarea
   const addTask = async (newTask) => {
     try {
-      const response = await createTask(newTask);  // Llamamos a la API para crear una nueva tarea
+      const response = await createTask(newTask);
       const taskWithId = {
         id: response.id,
         text: newTask,
-        phrase: response.quote + " - " + response.author
+        phrase: response.quote + " - " + response.author,
       };
-      
-      // Actualizar estado y localStorage
       setTasks((prevTasks) => {
         const updatedTasks = [...prevTasks, taskWithId];
         localStorage.setItem("tasks", JSON.stringify(updatedTasks));
@@ -45,29 +40,36 @@ export default function TodoApp() {
     }
   };
 
-  // Eliminar tarea
   const removeTask = (idToRemove) => {
     const newTasks = tasks.filter((task) => task.id !== idToRemove);
     setTasks(newTasks);
-    localStorage.setItem("tasks", JSON.stringify(newTasks));  // Actualizar localStorage
+    localStorage.setItem("tasks", JSON.stringify(newTasks));
   };
 
   return (
-    <div>
-      <h1>Tareas</h1>
-      <div>
-        {/* Aquí puedes agregar un formulario para agregar tareas si lo deseas */}
-        <button onClick={() => addTask("Nueva tarea")}>Agregar tarea</button>
-      </div>
-
-      <div>
-        {tasks.map((task) => (
-          <div key={task.id}>
-            <p>{task.text}</p>
-            <p>{task.phrase}</p>
-            <button onClick={() => removeTask(task.id)}>Eliminar</button>
+    <div className="w-full max-w-screen-md mx-auto">
+      <Form addTask={addTask} />
+      <div className="mt-4">
+        <AnimatePresence>
+          <div className="grid grid-cols-1 gap-0.5">
+            {tasks.map((task) => (
+              <motion.div
+                key={task.id}
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                layout
+                transition={{ duration: 0.4 }}
+              >
+                <TaskCard 
+                  task={task.text}
+                  phrase={task.phrase}
+                  removeTask={() => removeTask(task.id)} 
+                />
+              </motion.div>
+            ))}
           </div>
-        ))}
+        </AnimatePresence>
       </div>
     </div>
   );
