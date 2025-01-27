@@ -1,35 +1,43 @@
 import { useState, useEffect } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import Form from "./Form";
-import TaskCard from "./TaskCard";
-import "./TodoApp.css";  // Archivo CSS opcional para estilos adicionales
-import { createTask } from "../../APIs/POSTphrase";
+import { createTask, getTasksFromApi } from "../../APIs/POSTphrase";  // Asumimos que getTasksFromApi obtiene las tareas de la API
 
 export default function TodoApp() {
   const [tasks, setTasks] = useState([]);
 
+  // Cargar las tareas del localStorage o de la API
   useEffect(() => {
-    // Cargar tareas del localStorage solo en el navegador
-    if (typeof window !== "undefined") {
-      const storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
-      setTasks(storedTasks);
-    }
+    const loadTasks = async () => {
+      if (typeof window !== "undefined") {
+        // Primero intentamos obtener tareas desde localStorage
+        const storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        if (storedTasks.length > 0) {
+          setTasks(storedTasks);
+        } else {
+          // Si no hay tareas en localStorage, obtenemos desde la API
+          const tasksFromApi = await getTasksFromApi();
+          setTasks(tasksFromApi);
+          localStorage.setItem("tasks", JSON.stringify(tasksFromApi));  // Guardar las tareas en localStorage
+        }
+      }
+    };
+
+    loadTasks();
   }, []);
 
+  // Agregar tarea
   const addTask = async (newTask) => {
     try {
-      const response = await createTask(newTask); // Llama a createTask
+      const response = await createTask(newTask);  // Llamamos a la API para crear una nueva tarea
       const taskWithId = {
-        id: response.id,  // Usar id único generado por la API o UUID
+        id: response.id,
         text: newTask,
-        phrase: response.quote + " - " + response.author // Asegúrate de que `phrase` sea un string y no un objeto
+        phrase: response.quote + " - " + response.author
       };
+      
+      // Actualizar estado y localStorage
       setTasks((prevTasks) => {
         const updatedTasks = [...prevTasks, taskWithId];
-        // Guardar tareas en localStorage
-        if (typeof window !== "undefined") {
-          localStorage.setItem("tasks", JSON.stringify(updatedTasks));
-        }
+        localStorage.setItem("tasks", JSON.stringify(updatedTasks));
         return updatedTasks;
       });
     } catch (error) {
@@ -37,40 +45,29 @@ export default function TodoApp() {
     }
   };
 
+  // Eliminar tarea
   const removeTask = (idToRemove) => {
-    // Actualización correcta del estado: Filtramos solo el elemento con el id que debe eliminarse
     const newTasks = tasks.filter((task) => task.id !== idToRemove);
     setTasks(newTasks);
-    // Guardar tareas actualizadas en localStorage
-    if (typeof window !== "undefined") {
-      localStorage.setItem("tasks", JSON.stringify(newTasks));
-    }
+    localStorage.setItem("tasks", JSON.stringify(newTasks));  // Actualizar localStorage
   };
 
   return (
-    <div className="w-full max-w-screen-md mx-auto">
-      <Form addTask={addTask} />
-      <div className="mt-4">
-        <AnimatePresence>
-          <div className="grid grid-cols-1 gap-0.5">
-            {tasks.map((task) => (
-              <motion.div
-                key={task.id}  // Usamos id único como key
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                layout // Hacemos que los elementos se reorganicen con esta propiedad
-                transition={{ duration: 0.4 }}
-              >
-                <TaskCard 
-                  task={task.text}
-                  phrase={task.phrase}
-                  removeTask={() => removeTask(task.id)}  // Eliminación usando id
-                />
-              </motion.div>
-            ))}
+    <div>
+      <h1>Tareas</h1>
+      <div>
+        {/* Aquí puedes agregar un formulario para agregar tareas si lo deseas */}
+        <button onClick={() => addTask("Nueva tarea")}>Agregar tarea</button>
+      </div>
+
+      <div>
+        {tasks.map((task) => (
+          <div key={task.id}>
+            <p>{task.text}</p>
+            <p>{task.phrase}</p>
+            <button onClick={() => removeTask(task.id)}>Eliminar</button>
           </div>
-        </AnimatePresence>
+        ))}
       </div>
     </div>
   );
