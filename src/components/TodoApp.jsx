@@ -13,9 +13,9 @@ export default function TodoApp() {
     try {
       const response = await createTask(newTask); // Llama a createTask
       const taskWithId = {
-        id: response.quote,
+        id: response.id,
         text: newTask,
-        phrase: response.frase // Asegúrate de que `phrase` sea un string y no un objeto
+        phrase: response.quote +" - "+ response.author // Asegúrate de que `phrase` sea un string y no un objeto
       };
       setTasks((prevTasks) => [...prevTasks, taskWithId]);
     } catch (error) {
