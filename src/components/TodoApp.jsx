@@ -61,6 +61,7 @@ export default function TodoApp() {
                   task={task.text}
                   phrase={task.phrase}
                   removeTask={() => removeTask(index)} // Llamamos a removeTask con el índice
+                  className="task-card"  // Clase para aplicar estilos
                 />
               </motion.div>
             ))}
