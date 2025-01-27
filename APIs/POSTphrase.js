@@ -8,7 +8,7 @@ export const createTask = (taskText) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ task: taskText }),  // Enviar el texto de la tarea
+      body: JSON.stringify({ id: taskText }),  // Enviar el texto de la tarea
     })
     .then((response) => {
       if (!response.ok) {
