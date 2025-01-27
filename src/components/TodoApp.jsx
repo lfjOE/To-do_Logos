@@ -2,37 +2,34 @@ import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Form from "./Form";
 import TaskCard from "./TaskCard";
-import "./TodoApp.css";
-import { createTask, getTasksFromApi } from "../../APIs/POSTphrase";  // Asegúrate de que esta función existe
+import "./TodoApp.css"; // Archivo CSS opcional para estilos adicionales
+import { createTask } from "../../APIs/POSTphrase";
 
 export default function TodoApp() {
   const [tasks, setTasks] = useState([]);
 
+  // Cargar las tareas desde localStorage
   useEffect(() => {
-    // Obtener las tareas desde la API al cargar el componente
-    const loadTasks = async () => {
-      try {
-        const response = await getTasksFromApi();  // Obtén las tareas desde la API
-        setTasks(response);  // Asigna las tareas a tu estado
-      } catch (error) {
-        console.error("Error al cargar las tareas:", error);
-      }
-    };
+    if (typeof window !== "undefined") {
+      const storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
+      setTasks(storedTasks);
+    }
+  }, []);
 
-    loadTasks();
-  }, []);  // El array vacío asegura que esto solo se ejecute una vez cuando el componente se monte
-
+  // Función para agregar una tarea
   const addTask = async (newTask) => {
     try {
-      const response = await createTask(newTask);
-      const taskWithId = {
-        id: response.id,
+      const response = await createTask(newTask); // Llama a la API para crear la tarea
+      const taskWithPhrase = {
         text: newTask,
-        phrase: response.quote + " - " + response.author,
+        phrase: response.quote + " - " + response.author, // Combinamos la frase
       };
       setTasks((prevTasks) => {
-        const updatedTasks = [...prevTasks, taskWithId];
-        localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+        const updatedTasks = [...prevTasks, taskWithPhrase];
+        // Guardar las tareas actualizadas en localStorage
+        if (typeof window !== "undefined") {
+          localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+        }
         return updatedTasks;
       });
     } catch (error) {
@@ -40,36 +37,30 @@ export default function TodoApp() {
     }
   };
 
-  const removeTask = (idToRemove) => {
-    const newTasks = tasks.filter((task) => task.id !== idToRemove);
+  // Función para eliminar una tarea
+  const removeTask = (indexToRemove) => {
+    const newTasks = tasks.filter((task, index) => index !== indexToRemove);
     setTasks(newTasks);
-    localStorage.setItem("tasks", JSON.stringify(newTasks));
+    // Guardar tareas actualizadas en localStorage
+    if (typeof window !== "undefined") {
+      localStorage.setItem("tasks", JSON.stringify(newTasks));
+    }
   };
 
   return (
     <div className="w-full max-w-screen-md mx-auto">
-      <Form addTask={addTask} />
+      <Form addTask={addTask} /> {/* Componente para agregar tareas */}
       <div className="mt-4">
-        <AnimatePresence>
           <div className="grid grid-cols-1 gap-0.5">
-            {tasks.map((task) => (
-              <motion.div
-                key={task.id}
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                layout
-                transition={{ duration: 0.4 }}
-              >
-                <TaskCard 
+            {tasks.map((task, index) => (
+
+                <TaskCard
                   task={task.text}
                   phrase={task.phrase}
-                  removeTask={() => removeTask(task.id)} 
+                  removeTask={() => removeTask(index)} // Llamamos a removeTask con el índice
                 />
-              </motion.div>
             ))}
           </div>
-        </AnimatePresence>
       </div>
     </div>
   );

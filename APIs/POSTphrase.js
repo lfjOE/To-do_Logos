@@ -24,22 +24,3 @@ export const createTask = (taskText) => {
     });
   });
 };
-
-// Obtener todas las tareas desde la API
-export const getTasksFromApi = () => {
-  return new Promise((resolve, reject) => {
-    fetch(API_URL)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Error al obtener las tareas");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        resolve(data);  // Devuelve las tareas obtenidas
-      })
-      .catch((error) => {
-        reject(error);  // Si hay un error, rechaza la promesa
-      });
-  });
-};
