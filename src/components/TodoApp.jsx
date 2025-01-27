@@ -8,7 +8,6 @@ import { createTask } from "../../APIs/POSTphrase";
 export default function TodoApp() {
   const [tasks, setTasks] = useState([]);
 
-  // Cargar las tareas desde localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
@@ -16,7 +15,6 @@ export default function TodoApp() {
     }
   }, []);
 
-  // Función para agregar una tarea
   const addTask = async (newTask) => {
     try {
       const response = await createTask(newTask); // Llama a la API para crear la tarea
@@ -26,7 +24,6 @@ export default function TodoApp() {
       };
       setTasks((prevTasks) => {
         const updatedTasks = [...prevTasks, taskWithPhrase];
-        // Guardar las tareas actualizadas en localStorage
         if (typeof window !== "undefined") {
           localStorage.setItem("tasks", JSON.stringify(updatedTasks));
         }
@@ -37,11 +34,9 @@ export default function TodoApp() {
     }
   };
 
-  // Función para eliminar una tarea
   const removeTask = (indexToRemove) => {
     const newTasks = tasks.filter((task, index) => index !== indexToRemove);
     setTasks(newTasks);
-    // Guardar tareas actualizadas en localStorage
     if (typeof window !== "undefined") {
       localStorage.setItem("tasks", JSON.stringify(newTasks));
     }
@@ -51,16 +46,26 @@ export default function TodoApp() {
     <div className="w-full max-w-screen-md mx-auto">
       <Form addTask={addTask} /> {/* Componente para agregar tareas */}
       <div className="mt-4">
+        <AnimatePresence>
           <div className="grid grid-cols-1 gap-0.5">
             {tasks.map((task, index) => (
-
+              <motion.div
+                key={index} // Usamos el índice como key
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                layout // Aquí añadimos la propiedad layout
+                transition={{ duration: 0.4 }}
+              >
                 <TaskCard
                   task={task.text}
                   phrase={task.phrase}
                   removeTask={() => removeTask(index)} // Llamamos a removeTask con el índice
                 />
+              </motion.div>
             ))}
           </div>
+        </AnimatePresence>
       </div>
     </div>
   );
